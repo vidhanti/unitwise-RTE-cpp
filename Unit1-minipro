@@ -1,0 +1,212 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <ctime>
+#include <iomanip>
+
+using namespace std;
+
+// Base class for Smart Device
+class SmartDevice {
+protected:
+    string deviceID;
+    string deviceType;
+    string location;
+    string status;
+    string lastUpdated;
+
+    // Get current date and time
+    string getCurrentTime() {
+        time_t now = time(0);
+        tm *localTime = localtime(&now);
+
+        char buffer[80];
+        strftime(buffer, sizeof(buffer), "%d-%m-%Y %H:%M:%S", localTime);
+
+        return string(buffer);
+    }
+
+public:
+    // Constructor
+    SmartDevice(string id, string type, string loc) {
+        deviceID = id;
+        deviceType = type;
+        location = loc;
+        status = "OFF";
+        lastUpdated = getCurrentTime();
+    }
+
+    // Switch device ON
+    void switchOn() {
+        status = "ON";
+        lastUpdated = getCurrentTime();
+        cout << deviceType << " " << deviceID << " switched ON.\n";
+    }
+
+    // Switch device OFF
+    void switchOff() {
+        status = "OFF";
+        lastUpdated = getCurrentTime();
+        cout << deviceType << " " << deviceID << " switched OFF.\n";
+    }
+
+    // Change device status
+    void changeStatus(string newStatus) {
+        status = newStatus;
+        lastUpdated = getCurrentTime();
+        cout << "Status of " << deviceID << " changed to "
+             << status << ".\n";
+    }
+
+    // Display device information
+    void display() {
+        cout << "----------------------------------------\n";
+        cout << "Device ID     : " << deviceID << endl;
+        cout << "Device Type   : " << deviceType << endl;
+        cout << "Location      : " << location << endl;
+        cout << "Status        : " << status << endl;
+        cout << "Last Updated  : " << lastUpdated << endl;
+    }
+
+    string getID() {
+        return deviceID;
+    }
+};
+
+// Smart Home Manager
+class SmartHome {
+private:
+    vector<SmartDevice> devices;
+
+public:
+    // Add a device
+    void addDevice(SmartDevice device) {
+        devices.push_back(device);
+    }
+
+    // Find device by ID
+    SmartDevice* findDevice(string id) {
+        for (auto &device : devices) {
+            if (device.getID() == id) {
+                return &device;
+            }
+        }
+        return nullptr;
+    }
+
+    // Display all devices
+    void displayDashboard() {
+        cout << "\n========================================\n";
+        cout << "        SMART HOME DASHBOARD\n";
+        cout << "========================================\n";
+
+        if (devices.empty()) {
+            cout << "No devices available.\n";
+            return;
+        }
+
+        for (auto &device : devices) {
+            device.display();
+        }
+
+        cout << "========================================\n";
+    }
+};
+
+int main() {
+
+    SmartHome home;
+
+    // Create smart devices
+    SmartDevice light("L001", "Light", "Living Room");
+    SmartDevice thermostat("T001", "Thermostat", "Bedroom");
+    SmartDevice camera("C001", "Camera", "Main Door");
+    SmartDevice lock("D001", "Door Lock", "Main Door");
+
+    // Add devices to smart home
+    home.addDevice(light);
+    home.addDevice(thermostat);
+    home.addDevice(camera);
+    home.addDevice(lock);
+
+    int choice;
+    string id;
+
+    do {
+        cout << "\n\n========== SMART HOME MANAGER ==========\n";
+        cout << "1. Display Home Dashboard\n";
+        cout << "2. Switch Device ON\n";
+        cout << "3. Switch Device OFF\n";
+        cout << "4. Change Device Status\n";
+        cout << "5. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+
+        case 1:
+            home.displayDashboard();
+            break;
+
+        case 2: {
+            cout << "Enter Device ID: ";
+            cin >> id;
+
+            SmartDevice* device = home.findDevice(id);
+
+            if (device != nullptr) {
+                device->switchOn();
+            } else {
+                cout << "Device not found!\n";
+            }
+
+            break;
+        }
+
+        case 3: {
+            cout << "Enter Device ID: ";
+            cin >> id;
+
+            SmartDevice* device = home.findDevice(id);
+
+            if (device != nullptr) {
+                device->switchOff();
+            } else {
+                cout << "Device not found!\n";
+            }
+
+            break;
+        }
+
+        case 4: {
+            string newStatus;
+
+            cout << "Enter Device ID: ";
+            cin >> id;
+
+            SmartDevice* device = home.findDevice(id);
+
+            if (device != nullptr) {
+                cout << "Enter new status: ";
+                cin >> newStatus;
+
+                device->changeStatus(newStatus);
+            } else {
+                cout << "Device not found!\n";
+            }
+
+            break;
+        }
+
+        case 5:
+            cout << "Exiting Smart Home Manager...\n";
+            break;
+
+        default:
+            cout << "Invalid choice!\n";
+        }
+
+    } while (choice != 5);
+
+    return 0;
+}
